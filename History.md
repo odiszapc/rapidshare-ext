@@ -1,3 +1,7 @@
+## ver.0.0.2 2012-11-18
+
+Technical release. No features, no bug fixes.
+
 ## ver.0.0.1 2012-11-17
 
 It has began. We have the features as follows:
