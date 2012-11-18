@@ -1,7 +1,10 @@
+require "rest-client"
+require "rapidshare"
+require "rapidshare-base/utils"
+require "rapidshare-base/api"
+require "rapidshare-ext/api"
 require "rapidshare-ext/version"
 
-module Rapidshare
-  module Ext
-    # Your code goes here...
-  end
+class Rapidshare::API
+  include Rapidshare::Ext::API
 end
