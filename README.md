@@ -58,7 +58,7 @@ api.folders_hierarchy
 # }
 ```
 
-Note, that after the folder hierarhy is generated first time the data is cached permanently to improve performance.
+Note, that after the folder hierarchy is generated first time the data is cached permanently to improve performance.
 
 So, if you want to invalidate the cache just call the above method with trailing "!":
 ```ruby
@@ -87,7 +87,7 @@ ROOT
     `-c
 ```
 Orphans is invisible in your File Manager on the Rapidshare web site, so you may want to hide data in that way (stupid idea)
-We can fix it by detecting all orphan fodlers and moving them to a specific fodler:
+We can fix it by detecting all orphan folders and moving them to a specific folder:
 ```ruby
 move_orphans :to => "/"
 ```
