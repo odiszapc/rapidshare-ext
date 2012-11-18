@@ -7,8 +7,8 @@ Gem::Specification.new do |gem|
   gem.date          = '2012-11-18'
   gem.authors       = ["odiszapc"]
   gem.email         = ["odiszapc@gmail.com"]
-  gem.description   = %q{Makes your interactions with Rapidshare API more pleasant by providing new handy features: creating/moving/deleting files/folders in a user friendly way, upload files, etc}
-  gem.summary       = %q{Simplifies interactions with Rapidshare API with handy features}
+  gem.description   = %q{Simplifies interactions with Rapidshare API with a set of handy features}
+  gem.summary       = %q{Makes your interactions with Rapidshare API more pleasant by providing new handy features: creating/moving/deleting files/folders in a user friendly way, upload files, etc}
   gem.homepage      = "http://github.com/odiszapc/rapidshare-ext"
 
   gem.files         = `git ls-files`.split($\)
