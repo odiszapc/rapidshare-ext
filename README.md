@@ -30,11 +30,11 @@ api = Rapidshare::API.new(:cookie => 'cookie_here') # More preferable way
 
 Now you can perform file download in two ways: by the HTTP url or by the absolute path.
 
-First, by the HTTP url, as it worked before:
+First, by the HTTP url, as it has worked before:
 ```ruby
 @rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
   :downloads_dir => "/tmp",
-  :save_as => "file2.txt" # This doesn't work in the base rapidshare gem
+  :save_as => "file2.txt" # This doesn't work in the original gem at the moment because of Rapidshare API changes
 
   # With a default local file name
   @rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
@@ -154,7 +154,7 @@ api.folder_path(id) # "/foo/bar"
 ```
 
 ### Orphans
-As mentioned earlier, the Rapidshare has its common problem: orphan folders.
+As mentioned earlier, the Rapidshare has its common problem: the chance of orphan folders to be appeared.
 What does it mean? When you delete parent folder by its ID the folder will be deleted without any of its child folders being deleted.
 For example, let we have the basic directory tree:
 ```
@@ -195,3 +195,4 @@ api.erase_all_data!
 3. Commit your changes (`git commit -am 'Added some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+6. Open beer
