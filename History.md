@@ -1,3 +1,15 @@
+## ver.0.0.3 2012-11-19
+
+* [added] Downloading files by absolute path
+* [added] File download url added to the return hash of file_info(). Url is represented by the :url key
+* [changed] Folder pathes now have leading slash
+* [fixed] Base gem download functional didn't work when use :save_as param because of API changes month ago
+* [changed] Integration file uploading test refactored
+
+It has began. We have the features as follows:
+
+* [added] Creating folders
+
 ## ver.0.0.2 2012-11-18
 
 Technical release. No features, no bug fixes.

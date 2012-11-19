@@ -4,7 +4,6 @@ require File.expand_path('../lib/rapidshare-ext/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.name          = "rapidshare-ext"
   gem.version       = Rapidshare::Ext::VERSION
-  gem.date          = '2012-11-18'
   gem.authors       = ["odiszapc"]
   gem.email         = ["odiszapc@gmail.com"]
   gem.description   = %q{Extends the base rapidshare gem with a set of handy features}

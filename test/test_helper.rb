@@ -37,4 +37,8 @@ class Test::Unit::TestCase
     @rs = Rapidshare::API.new(:login => 'valid_login', :password => 'valid_password')
   end
 
+  def upload local_path, remote_filename, remote_dir
+
+  end
+
 end

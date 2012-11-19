@@ -12,6 +12,8 @@ module Rapidshare
       #
       #    api.add_folder("/a/b/c") #=> <Random folder ID from Rapidshare>, 1234 for example
       def add_folder(path, params = {})
+        path = path_trim path
+
         @tree = folders_hierarchy
         i = 1
         parent = 0
@@ -36,7 +38,7 @@ module Rapidshare
             @tree[folder_id] = {
               :parent => parent,
               :name => folder_name,
-              :path => (@tree[parent] || {})[:path].to_s + ('/' if @tree[parent]).to_s + folder_name
+              :path => path_canonize((@tree[parent] || {})[:path].to_s + ('/' if @tree[parent]).to_s + folder_name)
             }
             parent = folder_id
             path == base_path + '/' + folder_name
@@ -86,7 +88,7 @@ module Rapidshare
       #
       #    api.move_folder("/a/b/c", :to => "/a")
       def move_folder(source_path, params = {})
-        dest_path = path_trim(params.delete(:to) || '/')
+        dest_path = (params.delete(:to) || '/')
         source_folder_id = folder_id(source_path)
         dest_folder_id = folder_id(dest_path)
 
@@ -99,7 +101,7 @@ module Rapidshare
 
         @tree = folders_hierarchy
         @tree[source_folder_id][:parent] = dest_folder_id
-        @tree[source_folder_id][:path] = "#{folder_path(dest_folder_id)}/#{@tree[source_folder_id][:name]}"
+        @tree[source_folder_id][:path] = path_canonize "#{folder_path(dest_folder_id)}/#{@tree[source_folder_id][:name]}"
         true
       end
 
@@ -261,6 +263,7 @@ module Rapidshare
         end
 
         return @tree if @tree && !force_load # TODO: about slices here (:from parameter)
+        @tree = {}
 
         from_folder_id = folder_id from_folder_path
         raise Exception, "Folder #{from_folder_path} could not be found" if from_folder_id.nil?
@@ -322,12 +325,12 @@ module Rapidshare
         unless from_folder_path == ''
 
           result_tree.keep_if do |folder_id, data|
-            data[:path].start_with? "#{from_folder_path}/"
+            path_trim(data[:path]).start_with? "#{from_folder_path}/"
           end
 
           result_tree.each_pair do |folder_id, data|
             path = result_tree[folder_id][:path]
-            result_tree[folder_id][:path] = path.gsub /#{from_folder_path.gsub /\//, '\/'}\//, ''
+            result_tree[folder_id][:path] = path_canonize path_trim(path.gsub /#{from_folder_path.gsub /\//, '\/'}\//, '')
           end
         end
 
@@ -416,7 +419,8 @@ module Rapidshare
       def folder_path(folder_id)
         @tree = folders_hierarchy
         parent_id = @tree[folder_id][:parent]
-        (folder_path(parent_id) if parent_id.nonzero?).to_s + ('/' if parent_id.nonzero?).to_s + @tree[folder_id][:name]
+        path = (folder_path(parent_id) if parent_id.nonzero?).to_s + ('/' if parent_id.nonzero?).to_s + @tree[folder_id][:name]
+        parent_id.zero? ? "/#{path}" : path
       end
 
       # Get folder ID by path
@@ -428,7 +432,7 @@ module Rapidshare
 
         @tree = folders_hierarchy
         index = @tree.find_index do |folder_id, data|
-          data[:path] == folder_path
+          path_trim(data[:path]) == path_trim(folder_path)
         end
         @tree.keys[index] unless index.nil?
       end
@@ -477,12 +481,14 @@ module Rapidshare
           response[value.to_sym] = resp[index]
         end
 
+        response[:url] = "https://rapidshare.com/files/#{response[:id]}/#{URI::encode response[:filename]}" if response[:filename]
+
         response
       end
 
-      # Get file ID by absolute path
+      # Returns file ID by absolute path
       #
-      #    api.file_id("foo/bar/baz/file.rar") # -> 456
+      #    api.file_id("foo/bar/baz/file.rar") # => <FILE_ID>
       def file_id(file_path, params = {})
         params[:fields] = ""
         file_info = file_info file_path, params
@@ -493,6 +499,10 @@ module Rapidshare
 
       def path_trim(path)
         path.gsub(/\A\/+/, '').gsub(/\/+\Z/, '')
+      end
+
+      def path_canonize(path)
+        "/" + path_trim(path)
       end
     end
   end

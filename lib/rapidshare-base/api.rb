@@ -57,5 +57,15 @@ module Rapidshare
 
         self.parse_response(parser, response)
       end
+
+      def download(file, params= {})
+        if file.match /\Ahttps?:\/\//
+          url = file
+        else
+          url = file_info(file)[:url]
+        end
+
+        Rapidshare::Ext::Download.new(url, self, params).perform
+      end
   end
 end

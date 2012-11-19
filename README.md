@@ -65,7 +65,7 @@ So, if you want to invalidate the cache just call the above method with trailing
 api.folders_hierarchy!
 ```
 
-If folder tree is inconsistent (orphans are found) the Exception will be thrown. To automatically normalize the tree, call the method with :consistent flag:
+If folder tree is inconsistent (orphans are found, see next paragraph for details) the Exception will be thrown. To automatically normalize the tree, call the method with :consistent flag:
 ```ruby
 api.folders_hierarchy :consistent => true
 ```
@@ -79,25 +79,35 @@ tree = api.folders_hierarchy
 ```
 
 ### Orphans
-Ok, the Rapidshare has its common problem: orphan folders. What is this? For example we have the following directory tree:
+As mentioned before, the Rapidshare has its common problem: orphan folders.
+What does it mean? When you delete parent folder by its ID then it will be deleted without any of its child folders being deleted.
+For example, lets we have the basic directory tree:
 ```
 ROOT
 `-a  <- RS API allows us to delete JUST THIS folder, so hierarchy relation between folders will be lost and the folders "c" and "b" will become orphans
   `-b
     `-c
 ```
-Orphans is invisible in your File Manager on the Rapidshare web site, so you may want to hide data in that way (stupid idea)
-We can fix it by detecting all orphan folders and moving them to a specific folder:
+
+Orphan folders are invisible in your File Manager on the Rapidshare web site, so you may want to hide data in that way (stupid idea)
+
+So, the best way to delete directory tree without washing away its consistency is the following:
+```ruby
+api.remove_folder "/a"
+```
+
+Buy if you already have orphans in your account there is possible to fix them.
+The next method detects all orphan folders in your account and moves them to a specific folder:
 ```ruby
 move_orphans :to => "/"
 ```
 
-Or we can just kill'em all:
+Or we can just delete all of them (be careful):
 ```ruby
 remove_orphans!
 ```
 
-Get folder ID or path:
+Get the folder ID or path:
 ```ruby
 id = api.folder_id("/foo/bar") # <ID>
 api.folder_path(id) # "/foo/bar"
@@ -105,7 +115,28 @@ api.folder_path(id) # "/foo/bar"
 
 ### Files
 
-File uploading is simple now:
+Now you can download files in two ways: by HTTP url or by absolute path.
+
+By url, as it worked before:
+```ruby
+@rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
+  :downloads_dir => "/tmp",
+  :save_as => "file2.txt" # This doesn't work in the base rapidshare gem
+
+  # With a default local file name
+  @rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
+    :downloads_dir => "/tmp"
+```
+
+Download by the absolute path:
+```ruby
+@rs.download "/foo/bar/baz/upload_file_1.txt",
+  :downloads_dir => "/tmp"
+```
+
+For both first and second samples result will be the same
+
+File uploading became very simple now:
 ```ruby
 api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
 # => {
@@ -116,8 +147,9 @@ api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "ca
 #  :already_exists? => true/false # Does the file already exists within a specific folder, real uploading will not being performed in this case
 #}
 ```
+Destination folder will be created automatically.
 After uploading has been completed the file will be stored in a Rapidshare as "/gallery/video/cat1.mov"
-To get download url after uploading:
+You can easily get a download url after uploading:
 ```ruby
 result = api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
 result[:url]
@@ -130,7 +162,7 @@ api.upload("/home/odiszapc/my_damn_humster.mov")
 
 Deleting files:
 ```ruby
-api.remove_file("/putin/is/a/good/reason/to/live/abroad/ticket_to_Nikaragua.jpg")
+api.remove_file("/putin/is/a/good/reason/to/live/abroad/ticket_to_Nicaragua.jpg")
 ```
 
 Renaming files:
@@ -144,13 +176,13 @@ api.move_file("/foo/bar/baz.rar", :to => "/foo") # new file path: "/foo/baz.rar"
 api.move_file("/foo/bar/baz.rar") # move to a root folder
 ```
 
-Get file ID:
+Get the file ID:
 ```ruby
 api.file_id("/foo/bar/baz.rar") # => <ID>
 ```
 
 ### Account
-You can null your account by deleting all data involved. Be carefull with it, all data will be lost:
+You can null your account by deleting all data stored inside. Be careful with it, because all you los all your data:
 ```ruby
 api.erase_all_data!
 ```
