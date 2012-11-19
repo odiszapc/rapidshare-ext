@@ -26,6 +26,74 @@ api = Rapidshare::API.new(:login => 'my_login', :password => 'my_password')
 api = Rapidshare::API.new(:cookie => 'cookie_here') # More preferable way
 ```
 
+### Files
+
+Now you can perform file download in two ways: by the HTTP url or by the absolute path.
+
+First, by HTTP url, as it worked before:
+```ruby
+@rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
+  :downloads_dir => "/tmp",
+  :save_as => "file2.txt" # This doesn't work in the base rapidshare gem
+
+  # With a default local file name
+  @rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
+    :downloads_dir => "/tmp"
+```
+
+Download by the absolute path:
+```ruby
+@rs.download "/foo/bar/baz/upload_file_1.txt",
+  :downloads_dir => "/tmp"
+```
+
+For both first and second samples result will be the same.
+
+File uploading became very simple now:
+```ruby
+api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
+# => {
+#  :id         => 1,
+#  :size       => 12345, # File size in bytes
+#  :checksum   => <MD5>,
+#  :url        => <DOWNLOAD_URL>, # https://rapidshare/.......
+#  :already_exists? => true/false # Does the file already exists within a specific folder, real uploading will not being performed in this case
+#}
+```
+Destination folder will be created automatically.
+After the uploading has been completed the file will be stored in a Rapidshare as "/gallery/video/cat1.mov"
+You can easily get a download url after uploading:
+```ruby
+result = api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
+result[:url]
+```
+
+By default, file is uploaded to root folder:
+```ruby
+api.upload("/home/odiszapc/my_damn_humster.mov")
+```
+
+Deleting files:
+```ruby
+api.remove_file("/putin/is/a/good/reason/to/live/abroad/ticket_to_Nicaragua.jpg")
+```
+
+Renaming files:
+```ruby
+api.rename_file("/foo/bar.rar", "baz.rar")
+```
+
+Moving files:
+```ruby
+api.move_file("/foo/bar/baz.rar", :to => "/foo") # new file path: "/foo/baz.rar"
+api.move_file("/foo/bar/baz.rar") # move to a root folder
+```
+
+Get the file ID:
+```ruby
+api.file_id("/foo/bar/baz.rar") # => <ID>
+```
+
 ### Folders
 As you note you can have a hierarchy of folders in your account.
 
@@ -111,74 +179,6 @@ Get the folder ID or path:
 ```ruby
 id = api.folder_id("/foo/bar") # <ID>
 api.folder_path(id) # "/foo/bar"
-```
-
-### Files
-
-Now you can download files in two ways: by HTTP url or by absolute path.
-
-By url, as it worked before:
-```ruby
-@rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
-  :downloads_dir => "/tmp",
-  :save_as => "file2.txt" # This doesn't work in the base rapidshare gem
-
-  # With a default local file name
-  @rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
-    :downloads_dir => "/tmp"
-```
-
-Download by the absolute path:
-```ruby
-@rs.download "/foo/bar/baz/upload_file_1.txt",
-  :downloads_dir => "/tmp"
-```
-
-For both first and second samples result will be the same
-
-File uploading became very simple now:
-```ruby
-api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
-# => {
-#  :id         => 1,
-#  :size       => 12345, # File size in bytes
-#  :checksum   => <MD5>,
-#  :url        => <DOWNLOAD_URL>, # https://rapidshare/.......
-#  :already_exists? => true/false # Does the file already exists within a specific folder, real uploading will not being performed in this case
-#}
-```
-Destination folder will be created automatically.
-After uploading has been completed the file will be stored in a Rapidshare as "/gallery/video/cat1.mov"
-You can easily get a download url after uploading:
-```ruby
-result = api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
-result[:url]
-```
-
-By default, file is uploaded to root folder:
-```ruby
-api.upload("/home/odiszapc/my_damn_humster.mov")
-```
-
-Deleting files:
-```ruby
-api.remove_file("/putin/is/a/good/reason/to/live/abroad/ticket_to_Nicaragua.jpg")
-```
-
-Renaming files:
-```ruby
-api.rename_file("/foo/bar.rar", "baz.rar")
-```
-
-Moving files:
-```ruby
-api.move_file("/foo/bar/baz.rar", :to => "/foo") # new file path: "/foo/baz.rar"
-api.move_file("/foo/bar/baz.rar") # move to a root folder
-```
-
-Get the file ID:
-```ruby
-api.file_id("/foo/bar/baz.rar") # => <ID>
 ```
 
 ### Account
