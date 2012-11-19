@@ -1,8 +1,8 @@
 # Rapidshare::Ext
 
-Makes your interactions with Rapidshare API more pleasant by providing new handy features: creating/moving/deleting files/folders in a user friendly way, upload files, etc.
+Makes your interactions with the Rapidshare API more pleasant by providing new handy features: creating/moving/deleting files/folders in a user friendly way, upload files, etc.
 
-This gem extends the existing one - https://github.com/defkode/rapidshare, so it has all features implemented in the source library. In addition, it much simplifies operations with data in your Rapidshare account.
+This gem extends the existing one - https://github.com/defkode/rapidshare, so it has all features have been implemented by the authors of the original gem at the moment.
 
 ## Installation
 
@@ -30,7 +30,7 @@ api = Rapidshare::API.new(:cookie => 'cookie_here') # More preferable way
 
 Now you can perform file download in two ways: by the HTTP url or by the absolute path.
 
-First, by HTTP url, as it worked before:
+First, by the HTTP url, as it worked before:
 ```ruby
 @rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
   :downloads_dir => "/tmp",
@@ -47,7 +47,7 @@ Download by the absolute path:
   :downloads_dir => "/tmp"
 ```
 
-For both first and second samples result will be the same.
+In both the first and second samples the result will be the same.
 
 File uploading became very simple now:
 ```ruby
@@ -68,7 +68,7 @@ result = api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :
 result[:url]
 ```
 
-By default, file is uploaded to root folder:
+By default, file is uploaded to the root folder:
 ```ruby
 api.upload("/home/odiszapc/my_damn_humster.mov")
 ```
@@ -113,7 +113,7 @@ api.move_folder("/a/b/c", :to => "/a")
 ```
 This moves folder "c" from directory "/a/b/" and places it under the directory "/a"
 
-Get hierarchy of all folders in account:
+Get the hierarchy of all folders in account:
 ```ruby
 api.folders_hierarchy
 # => {
@@ -126,30 +126,37 @@ api.folders_hierarchy
 # }
 ```
 
-Note, that after the folder hierarchy is generated first time the data is cached permanently to improve performance.
+Note, that after the folder hierarchy is generated first time it's cached permanently to improve performance.
 
 So, if you want to invalidate the cache just call the above method with trailing "!":
 ```ruby
 api.folders_hierarchy!
 ```
 
-If folder tree is inconsistent (orphans are found, see next paragraph for details) the Exception will be thrown. To automatically normalize the tree, call the method with :consistent flag:
+If folder tree is inconsistent (orphans are found, see next paragraph for details) the Exception will be thrown when you perform #folders_hierarchy.
+To automatically normalize the tree, call the method with the :consistent flag:
 ```ruby
 api.folders_hierarchy :consistent => true
 ```
-Be careful with a tree consistency, orphan folders may contain a critical data.
+Be careful with the tree consistency, orphan folders may contain a critical data.
 
-A more secure way to deal with consistency is to fix orphans first and then generate folders tree:
+A more secure way to deal with folder consistency is to fix all orphans first and then generate folder tree:
 ```ruby
 api.add_folder "/garbage"
 api.move_orphans :to => "/garbage" # Collect all orphans and place them under the /garbage folder
 tree = api.folders_hierarchy
 ```
 
+Get the folder ID or path:
+```ruby
+id = api.folder_id("/foo/bar") # <ID>
+api.folder_path(id) # "/foo/bar"
+```
+
 ### Orphans
-As mentioned before, the Rapidshare has its common problem: orphan folders.
-What does it mean? When you delete parent folder by its ID then it will be deleted without any of its child folders being deleted.
-For example, lets we have the basic directory tree:
+As mentioned earlier, the Rapidshare has its common problem: orphan folders.
+What does it mean? When you delete parent folder by its ID the folder will be deleted without any of its child folders being deleted.
+For example, let we have the basic directory tree:
 ```
 ROOT
 `-a  <- RS API allows us to delete JUST THIS folder, so hierarchy relation between folders will be lost and the folders "c" and "b" will become orphans
@@ -157,15 +164,15 @@ ROOT
     `-c
 ```
 
-Orphan folders are invisible in your File Manager on the Rapidshare web site, so you may want to hide data in that way (stupid idea)
+My know-how: orphan folders become invisible in your File Manager on the Rapidshare web site, so you may want to hide all the data in this way (stupid idea)
 
-So, the best way to delete directory tree without washing away its consistency is the following:
+So, the best way to delete some directory tree without washing away its consistency is the following:
 ```ruby
-api.remove_folder "/a"
+api.remove_folder "/a" # This will correctly delete all child directories
 ```
 
-Buy if you already have orphans in your account there is possible to fix them.
-The next method detects all orphan folders in your account and moves them to a specific folder:
+But if you already have orphans in your account there is possible to fix them.
+The next method detects all orphan folders in your account and moves them into a specific folder:
 ```ruby
 move_orphans :to => "/"
 ```
@@ -175,14 +182,8 @@ Or we can just delete all of them (be careful):
 remove_orphans!
 ```
 
-Get the folder ID or path:
-```ruby
-id = api.folder_id("/foo/bar") # <ID>
-api.folder_path(id) # "/foo/bar"
-```
-
 ### Account
-You can null your account by deleting all data stored inside. Be careful with it, because all you los all your data:
+You can null your account by deleting all data stored inside. Be careful with it, because all you lose all your data:
 ```ruby
 api.erase_all_data!
 ```
