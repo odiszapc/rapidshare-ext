@@ -20,7 +20,7 @@ class RapidshareExtTest < Test::Unit::TestCase
   end
 
   context "Api" do
-    should "Upload file" do
+    should "upload file" do
       upload_assertion = ->(resp, size_local, digest_local, remote_filename) do
         assert_instance_of Hash, resp
         assert_kind_of Integer, resp[:id]
@@ -62,7 +62,7 @@ class RapidshareExtTest < Test::Unit::TestCase
       assert_true response[:already_exists?]
     end
 
-    should "Download file" do
+    should "download file" do
       @rs.upload @upload_file_1, :to => "/a/b/c", :as => "upload_file_1.txt"
       assert_not_nil @rs.file_info("/a/b/c/upload_file_1.txt")
 
@@ -85,7 +85,7 @@ class RapidshareExtTest < Test::Unit::TestCase
       assert_equal @upload_file_1_md5, Digest::MD5.hexdigest(File.read("#@download_dir/file2.txt"))
     end
 
-    should "Rename file" do
+    should "rename file" do
       @rs.upload @upload_file_1, :to => "/a/b/c", :as => "upload_file_1.txt"
       assert_not_nil @rs.file_info("/a/b/c/upload_file_1.txt")
 
@@ -99,7 +99,7 @@ class RapidshareExtTest < Test::Unit::TestCase
       assert_equal info[:md5hex].downcase, @upload_file_1_md5
     end
 
-    should "Move file" do
+    should "move file" do
       @rs.upload @upload_file_1, :to => "/a/b/c", :as => "upload_file_1.txt"
       assert_not_nil @rs.file_info("/a/b/c/upload_file_1.txt")
 
@@ -114,7 +114,7 @@ class RapidshareExtTest < Test::Unit::TestCase
       assert_equal info[:md5hex].downcase, @upload_file_1_md5
     end
 
-    should "Delete file" do
+    should "delete file" do
       @rs.upload @upload_file_1, :to => "/a/b/c", :as => "upload_file_1.txt"
       assert_not_nil @rs.file_info("/a/b/c/upload_file_1.txt")
 
@@ -122,13 +122,13 @@ class RapidshareExtTest < Test::Unit::TestCase
       assert_nil @rs.file_info("/a/b/c/upload_file_1.txt")
     end
 
-    should "Folder id <=> path conversions" do
+    should "folder id <=> path conversions" do
       @rs.add_folder "/a/b/c"
       id = @rs.folder_id("/a/b/c")
       assert_equal "/a/b/c", @rs.folder_path(id)
     end
 
-    should "Create folder" do
+    should "create folder" do
       folder_id = @rs.add_folder "a/b/c"
       assert_kind_of Integer, folder_id
       assert_not_equal 0, folder_id
@@ -140,7 +140,7 @@ class RapidshareExtTest < Test::Unit::TestCase
       assert_equal "/a", tree[tree[tree[folder_id][:parent]][:parent]][:path]
     end
 
-    should "Move folder" do
+    should "move folder" do
       folder_id = @rs.add_folder "/a/b/c"
       assert_kind_of Integer, folder_id
       assert_not_equal 0, folder_id
@@ -160,7 +160,7 @@ class RapidshareExtTest < Test::Unit::TestCase
       assert_equal @rs.folder_id("/a"), tree[folder_id][:parent]
     end
 
-    should "Remove folder" do
+    should "remove folder" do
       folder_id = @rs.add_folder "a/b/c"
       assert_kind_of Integer, folder_id
       assert_not_equal 0, folder_id
@@ -185,7 +185,7 @@ class RapidshareExtTest < Test::Unit::TestCase
     end
 
 
-    should "Build folders tree" do
+    should "build folders tree" do
       # Create folders
       folder_a_id = @rs.add_folder "/a"
       assert_kind_of Integer, folder_a_id
@@ -224,7 +224,7 @@ class RapidshareExtTest < Test::Unit::TestCase
       assert_equal folder_b_id, sub_tree[folder_c_id][:parent]
     end
 
-    should "Erase all account data" do
+    should "erase all account data" do
       folder_id = @rs.add_folder "/a/b/c"
       assert_kind_of Integer, folder_id
 
@@ -236,6 +236,124 @@ class RapidshareExtTest < Test::Unit::TestCase
 
       folder_ids = @rs.folders_hierarchy.keys
       assert_equal 0, folder_ids.count
+    end
+
+    should "move orphans" do
+      # Create folders
+      folder_a_id = @rs.add_folder "/a"
+      assert_kind_of Integer, folder_a_id
+      assert_not_equal 0, folder_a_id
+
+      folder_b_id = @rs.add_folder "/a/b"
+      assert_kind_of Integer, folder_b_id
+      assert_not_equal 0, folder_b_id
+
+      folder_c_id = @rs.add_folder "/a/b/c"
+      assert_kind_of Integer, folder_c_id
+      assert_not_equal 0, folder_c_id
+
+      @rs.reload!
+
+      assert_true @rs.root_folder? folder_a_id
+      assert_false @rs.root_folder? folder_b_id
+      assert_false @rs.root_folder? folder_c_id
+
+      assert_false @rs.orphan? folder_a_id
+      assert_false @rs.orphan? folder_b_id
+      assert_false @rs.orphan? folder_c_id
+
+      # Delete just folder "/a" to accomplish tree inconsistency
+      @rs.delrealfolder :realfolder => folder_a_id
+      @rs.reload! :validate => false
+
+      assert_equal [folder_b_id], @rs.detect_gaps
+
+      assert_false @rs.root_folder? folder_a_id
+      assert_false @rs.root_folder? folder_b_id
+      assert_false @rs.root_folder? folder_c_id
+
+      assert_false @rs.orphan? folder_a_id
+      assert_true @rs.orphan? folder_b_id
+      assert_true @rs.orphan? folder_c_id
+
+      # Move orphan folders to root folder
+      @rs.move_orphans :to => "/"
+
+      hierarchy_expected = {
+        folder_c_id => {:name=>"c", :parent => folder_b_id, :path => "/b/c"},
+        folder_b_id => {:name=>"b", :parent => 0, :path => "/b"},
+      }
+      assert_equal hierarchy_expected, @rs.folders_hierarchy!
+    end
+
+    should "delete orphans" do
+      # Create folders
+      folder_a_id = @rs.add_folder "/a"
+      assert_kind_of Integer, folder_a_id
+      assert_not_equal 0, folder_a_id
+
+      folder_b_id = @rs.add_folder "/a/b"
+      assert_kind_of Integer, folder_b_id
+      assert_not_equal 0, folder_b_id
+
+      folder_c_id = @rs.add_folder "/a/b/c"
+      assert_kind_of Integer, folder_c_id
+      assert_not_equal 0, folder_c_id
+
+      @rs.reload!
+
+      assert_true @rs.root_folder? folder_a_id
+      assert_false @rs.root_folder? folder_b_id
+      assert_false @rs.root_folder? folder_c_id
+
+      assert_false @rs.orphan? folder_a_id
+      assert_false @rs.orphan? folder_b_id
+      assert_false @rs.orphan? folder_c_id
+
+      # Delete just folder "/a" to accomplish tree inconsistency
+      @rs.delrealfolder :realfolder => folder_a_id
+      @rs.reload! :validate => false
+
+      @rs.remove_orphans!
+
+      hierarchy_expected = {
+        folder_c_id => {:name=>"c", :parent => folder_b_id, :path => "/b/c"},
+        folder_b_id => {:name=>"b", :parent => 0, :path => "/b"},
+      }
+      assert_equal ({}), @rs.folders_hierarchy!
+    end
+
+    should "work with invalid tree" do
+      # Create folders
+      folder_a_id = @rs.add_folder "/a"
+      assert_kind_of Integer, folder_a_id
+      assert_not_equal 0, folder_a_id
+
+      folder_b_id = @rs.add_folder "/a/b"
+      assert_kind_of Integer, folder_b_id
+      assert_not_equal 0, folder_b_id
+
+      folder_c_id = @rs.add_folder "/a/b/c"
+      assert_kind_of Integer, folder_c_id
+      assert_not_equal 0, folder_c_id
+
+      @rs.reload!
+
+      assert_true @rs.root_folder? folder_a_id
+      assert_false @rs.root_folder? folder_b_id
+      assert_false @rs.root_folder? folder_c_id
+
+      assert_false @rs.orphan? folder_a_id
+      assert_false @rs.orphan? folder_b_id
+      assert_false @rs.orphan? folder_c_id
+
+      # Delete just folder "/a" to accomplish tree inconsistency
+      @rs.delrealfolder :realfolder => folder_a_id
+
+      msg = "Directory tree consistency error. Parent folder ##{folder_a_id} for the folder \"/<undefined>/b\" [#{folder_b_id}] could not be found"
+      assert_raise_message(msg) do
+        @rs.reload! :validate => true
+      end
     end
   end
 end

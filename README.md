@@ -41,7 +41,7 @@ First, by the HTTP url, as it has worked before:
     :downloads_dir => "/tmp"
 ```
 
-Download by the absolute path:
+Download by absolute path:
 ```ruby
 @rs.download "/foo/bar/baz/upload_file_1.txt",
   :downloads_dir => "/tmp"
@@ -61,7 +61,7 @@ api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "ca
 #}
 ```
 Destination folder will be created automatically.
-After the uploading has been completed the file will be stored in a Rapidshare as "/gallery/video/cat1.mov"
+After uploading has been completed the file will be stored in a Rapidshare as "/gallery/video/cat1.mov"
 You can easily get a download url after uploading:
 ```ruby
 result = api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")

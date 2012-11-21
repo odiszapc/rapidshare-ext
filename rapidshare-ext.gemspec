@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.version       = Rapidshare::Ext::VERSION
   gem.authors       = ["odiszapc"]
   gem.email         = ["odiszapc@gmail.com"]
-  gem.description   = %q{Extends the base rapidshare gem with a set of handy features}
+  gem.description   = %q{Extends the original rapidshare gem with a set of handy features}
   gem.summary       = %q{Makes your interactions with Rapidshare API more pleasant by providing new handy features: creating/moving/deleting files/folders in a user friendly way, upload files, etc}
   gem.homepage      = "http://github.com/odiszapc/rapidshare-ext"
 

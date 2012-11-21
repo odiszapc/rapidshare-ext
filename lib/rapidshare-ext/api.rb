@@ -247,12 +247,18 @@ module Rapidshare
       #   Invalidate cached tree, default: false
       #   After each call of this method the generated tree will be saved as cache
       #   to avoid unnecessary queries to be performed fpr a future calls
+      # <tt>:validate</tt>::
+      #   Validate tree after it has been generated, default: true
       # <tt>:consistent</tt>::
       #   Delete all found orphans, default: false
+      #   Ignored if :validate is set to false
       def folders_hierarchy(params = {})
         force_load = params.delete :force
         from_folder_path = path_trim(params.delete(:from) || '/')
         remove_orphans = params.delete(:consistent)
+        perform_validation = params.delete(:validate)
+        perform_validation = true if perform_validation.nil?
+        remove_orphans = false unless perform_validation
 
         if @tree && !force_load
           if from_folder_path.empty?
@@ -284,18 +290,19 @@ module Rapidshare
         # Kill orphans
         remove_orphans! if remove_orphans
 
-        # Validate folder tree consistency
-        @tree.each_pair do |folder_id, data|
-          parent_id = data[:parent]
-          if !parent_id.zero? && @tree[parent_id].nil?
-
-            error = "There is no parent folder with id ##{data[:parent]} for the folder \"#{data[:name]}\" [#{folder_id}]"
-            raise error
-          end
-        end
-
         @tree.each_pair do |folder_id, data|
           @tree[folder_id][:path] = folder_path folder_id
+        end
+
+        if perform_validation
+          # Validate folder tree consistency
+          @tree.each_pair do |folder_id, data|
+            parent_id = data[:parent]
+            if !parent_id.zero? && @tree[parent_id].nil?
+              error = "Directory tree consistency error. Parent folder ##{data[:parent]} for the folder \"#{data[:path]}\" [#{folder_id}] could not be found"
+              raise error
+            end
+          end
         end
 
         @tree = slice_tree @tree, :from => from_folder_path unless from_folder_path.empty?
@@ -358,18 +365,23 @@ module Rapidshare
       # Example:
       # move_orphans :to => "/"
       def move_orphans(params = {})
-        new_folder = folder_id params[:to].to_s
-        orphans = detect_gaps.join(',')
-        if orphans.any?
-          moverealfolder :realfolder => orphans.join(','), :newparent => new_folder
+        new_folder = path_trim(params.delete(:to) || '/')
+        gaps = detect_gaps
+
+        if gaps.any?
+          params = {
+            :realfolder => gaps.join(','),
+            :newparent => new_folder
+          }.merge params
+          moverealfolder params
         end
       end
 
       # Returns gap list between folders
       # See #gap? for example
       def detect_gaps
-        @tree = folders_hierarchy
-        @tree.keep_if do |folder_id, data|
+        @tree = folders_hierarchy :validate => false
+        @tree.dup.keep_if do |folder_id, data|
           gap? folder_id # This is wrong
         end.keys
       end
@@ -378,7 +390,7 @@ module Rapidshare
       # WARNING!!! All data will be lost!!!
       # Use it carefully
       def erase_all_data!
-        @tree = folders_hierarchy
+        @tree = folders_hierarchy! :validate => false
         @tree.keys.each do |folder_id|
           delrealfolder :realfolder => folder_id
         end
@@ -387,13 +399,14 @@ module Rapidshare
 
       # Check if folder with given id placed on the bottom of folder hierarchy
       def root_folder?(folder_id)
-        @tree = folders_hierarchy
+        @tree = folders_hierarchy :validate => false
+        return false if @tree[folder_id].nil?
         @tree[folder_id][:parent].zero?
       end
 
       # Check if the given folder has no parent
       def gap?(folder_id)
-        @tree = folders_hierarchy
+        @tree = folders_hierarchy :validate => false
         parent_id = @tree[folder_id][:parent]
         @tree[parent_id].nil?
       end
@@ -406,7 +419,8 @@ module Rapidshare
       #   `-b
       #     `-c
       def orphan?(folder_id)
-        @tree = folders_hierarchy
+        @tree = folders_hierarchy :validate => false
+        return false if @tree[folder_id].nil?
         parent_id = @tree[folder_id][:parent]
         return false if root_folder? folder_id
         return true if gap? folder_id
@@ -418,8 +432,11 @@ module Rapidshare
       #    api.folder_path(123) # -> "foo/bar/baz"
       def folder_path(folder_id)
         @tree = folders_hierarchy
-        parent_id = @tree[folder_id][:parent]
-        path = (folder_path(parent_id) if parent_id.nonzero?).to_s + ('/' if parent_id.nonzero?).to_s + @tree[folder_id][:name]
+
+        folder_data = @tree[folder_id] || {:parent => 0, :name => "<undefined>", :path => "<undefined>"}
+
+        parent_id = folder_data[:parent]
+        path = (folder_path(parent_id) if parent_id.nonzero?).to_s + ('/' if parent_id.nonzero?).to_s + folder_data[:name]
         parent_id.zero? ? "/#{path}" : path
       end
 
@@ -456,7 +473,7 @@ module Rapidshare
       #   :licids,
       #   :sentby
       # }
-      # See http://images.rapidshare.com/apidoc.txt for more details
+      # See the http://images.rapidshare.com/apidoc.txt for more details
       def file_info(file_path, params = {})
         folder_path = File.dirname file_path
         file_name = File.basename file_path

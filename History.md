@@ -1,4 +1,10 @@
-## ver.0.0.3 2012-11-19
+## ver. 0.0.4 2012-11-21
+
+* [changed] folders_hierarchy(): :validate param added
+* [changed] folders_hierarchy(), folder_path(): orphan pathes marked with "<undefined>" parts
+* [changed] 100% code coverage
+
+## ver. 0.0.3 2012-11-19
 
 * [added] Downloading files by absolute path
 * [added] File download url added to the return hash of file_info(). Url is represented by the :url key
@@ -10,11 +16,11 @@ It has began. We have the features as follows:
 
 * [added] Creating folders
 
-## ver.0.0.2 2012-11-18
+## ver. 0.0.2 2012-11-18
 
 Technical release. No features, no bug fixes.
 
-## ver.0.0.1 2012-11-17
+## ver. 0.0.1 2012-11-17
 
 It has began. We have the features as follows:
 
