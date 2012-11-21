@@ -1,3 +1,7 @@
+## ver. 0.0.5 2012-11-21
+
+* [fixed] remove_orphans!()
+
 ## ver. 0.0.4 2012-11-21
 
 * [changed] folders_hierarchy(): :validate param added

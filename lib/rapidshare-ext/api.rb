@@ -348,7 +348,7 @@ module Rapidshare
       # by deleting orphan folders (folders with no parent folder), this folders are invisible in Rapidshare File Manager
       # So, this method deletes orphan folders
       def remove_orphans!
-        @tree = folders_hierarchy
+        @tree = folders_hierarchy :validate => false
         @tree.each_pair do |folder_id, data|
           @tree.delete_if do |folder_id, data|
             if orphan? folder_id
