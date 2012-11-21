@@ -28,7 +28,7 @@ api = Rapidshare::API.new(:cookie => 'cookie_here') # More preferable way
 
 ### Files
 
-Now you can perform file download in two ways: by the HTTP url or by the absolute path.
+Now you can perform file downloading in two ways: by HTTP url or by absolute path.
 
 First, by the HTTP url, as it has worked before:
 ```ruby
@@ -41,7 +41,7 @@ First, by the HTTP url, as it has worked before:
     :downloads_dir => "/tmp"
 ```
 
-Download by absolute path:
+Download by absolute path from account you owned:
 ```ruby
 @rs.download "/foo/bar/baz/upload_file_1.txt",
   :downloads_dir => "/tmp"
@@ -49,7 +49,7 @@ Download by absolute path:
 
 In both the first and second samples the result will be the same.
 
-File uploading became very simple now:
+File uploading is also became very simple:
 ```ruby
 api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
 # => {
@@ -68,7 +68,7 @@ result = api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :
 result[:url]
 ```
 
-By default, file is uploaded to the root folder:
+By default, file is uploaded into the root folder:
 ```ruby
 api.upload("/home/odiszapc/my_damn_humster.mov")
 ```
@@ -95,9 +95,9 @@ api.file_id("/foo/bar/baz.rar") # => <ID>
 ```
 
 ### Folders
-As you note you can have a hierarchy of folders in your account.
+As you note it's possible having a hierarchy of folders in your account.
 
-Creating folders:
+Creating folder hierarchy:
 ```ruby
 folder_id = api.add_folder "a/b/c" # => <FOLDER ID>
 ```
@@ -111,9 +111,9 @@ Moving folders:
 ```ruby
 api.move_folder("/a/b/c", :to => "/a")
 ```
-This moves folder "c" from directory "/a/b/" and places it under the directory "/a"
+This moves the folder "c" from the directory "/a/b/" and places it under the directory "/a"
 
-Get the hierarchy of all folders in account:
+You can get hierarchy of all the folders in account:
 ```ruby
 api.folders_hierarchy
 # => {
@@ -159,20 +159,20 @@ What does it mean? When you delete parent folder by its ID the folder will be de
 For example, let we have the basic directory tree:
 ```
 ROOT
-`-a  <- RS API allows us to delete JUST THIS folder, so hierarchy relation between folders will be lost and the folders "c" and "b" will become orphans
+`-a  <- Raw Rapidshare API allows you to delete JUST THIS folder, so hierarchy relation between folders will be lost and the folders "c" and "b" will became orphans
   `-b
     `-c
 ```
 
-My know-how: orphan folders become invisible in your File Manager on the Rapidshare web site, so you may want to hide all the data in this way (stupid idea)
+**Know-how:** orphan folders become invisible in your File Manager on the Rapidshare web site, so you may want to hide all the data in this way (stupid idea)
 
-So, the best way to delete some directory tree without washing away its consistency is the following:
+So, the best way to delete a directory tree without washing away consistency of account folder hierarchy is the following:
 ```ruby
-api.remove_folder "/a" # This will correctly delete all child directories
+api.remove_folder "/a" # This will delete all the child directories correctly
 ```
 
-But if you already have orphans in your account there is possible to fix them.
-The next method detects all orphan folders in your account and moves them into a specific folder:
+However, if you already have orphans in your account there is possible to fix them.
+So ,the next method detects all orphan folders in your account and moves them into a specific folder:
 ```ruby
 api.move_orphans :to => "/"
 ```
@@ -188,7 +188,7 @@ You can null your account by deleting all the data stored inside:
 api.erase_all_data!
 ```
 
-**Be careful with it, because all you lose all your data**
+**Be careful with it, because you stake losing all your data**
 
 ## Contributing
 
