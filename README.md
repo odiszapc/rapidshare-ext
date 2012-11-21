@@ -174,19 +174,21 @@ api.remove_folder "/a" # This will correctly delete all child directories
 But if you already have orphans in your account there is possible to fix them.
 The next method detects all orphan folders in your account and moves them into a specific folder:
 ```ruby
-move_orphans :to => "/"
+api.move_orphans :to => "/"
 ```
 
 Or we can just delete all of them (be careful):
 ```ruby
-remove_orphans!
+api.remove_orphans!
 ```
 
 ### Account
-You can null your account by deleting all data stored inside. Be careful with it, because all you lose all your data:
+You can null your account by deleting all the data stored inside:
 ```ruby
 api.erase_all_data!
 ```
+
+**Be careful with it, because all you lose all your data**
 
 ## Contributing
 

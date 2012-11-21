@@ -36,4 +36,4 @@ It has began. We have the features as follows:
 * [added] Erasing all account data
 * [added] Get file info
 * [added] Folder/file identification by path
-* [added] Integration tests (Forkers, be careful, account is fully erased after each test !!!)
+* [added] Integration tests (Forkers, be careful, account is fully erased before each test execution being performed!)
