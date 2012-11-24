@@ -113,6 +113,8 @@ module Rapidshare
       #   Folder to place uploaded file to,  default: "/"
       # <tt>:as</tt>::
       #   The name file will have in storage after it has been uploaded
+      # <tt>:overwrite</tt>::
+      #   Overwrite file if it already exists in the given folder
       #
       #    api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
       def upload(file_path, params = {})
@@ -120,6 +122,7 @@ module Rapidshare
         dest_path = path_trim(params.delete(:to) || '/')
         folder_id = self.add_folder dest_path
         file_name = params.delete(:as) || File.basename(file_path)
+        overwrite = params.delete :overwrite
 
         # Check file already exists within a folder
         listfiles_params = {
@@ -130,11 +133,14 @@ module Rapidshare
         }
         listfiles_response = self.listfiles listfiles_params
 
-        # In case of file is not existing upload it
-        if "NONE" == listfiles_response[0][0]
+        file_already_exists = ("NONE" != listfiles_response[0][0])
+        remove_file "#{dest_path}/#{file_name}" if file_already_exists && overwrite
+
+        # In case of file is not existing then upload it
+        if !file_already_exists || overwrite
           upload_server = "rs#{self.nextuploadserver}.rapidshare.com"
 
-         upload_params = {
+          upload_params = {
             :server => upload_server,
             :folder => folder_id,
             :filename => file_name,

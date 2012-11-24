@@ -1,3 +1,7 @@
+## ver. 0.0.6 2012-11-25
+
+* [changed] upload(): :overwrite parameter added
+
 ## ver. 0.0.5 2012-11-21
 
 * [fixed] remove_orphans!()

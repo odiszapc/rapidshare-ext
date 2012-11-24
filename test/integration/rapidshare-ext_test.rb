@@ -17,6 +17,10 @@ class RapidshareExtTest < Test::Unit::TestCase
     @upload_file_1 = File.expand_path(File.dirname(__FILE__) + "/../fixtures/files/upload1.txt")
     @upload_file_1_md5 = Digest::MD5.hexdigest(File.read(@upload_file_1))
     @upload_file_1_size = File.size @upload_file_1
+
+    @upload_file_2 = File.expand_path(File.dirname(__FILE__) + "/../fixtures/files/upload2.txt")
+    @upload_file_2_md5 = Digest::MD5.hexdigest(File.read(@upload_file_2))
+    @upload_file_2_size = File.size @upload_file_2
   end
 
   context "Api" do
@@ -58,8 +62,17 @@ class RapidshareExtTest < Test::Unit::TestCase
 
       # Upload the same file again
       response = @rs.upload @upload_file_1, :to => remote_dir, :as => remote_filename
-      upload_assertion.call response, @upload_file_1_size, @upload_file_1_md5, remote_filename
       assert_true response[:already_exists?]
+      upload_assertion.call response, @upload_file_1_size, @upload_file_1_md5, remote_filename
+
+      # Upload another file under the same path but with overwriting the existing one
+      response = @rs.upload @upload_file_2,
+                            :to => remote_dir,
+                            :as => remote_filename,
+                            :overwrite => true
+
+      assert_false response[:already_exists?]
+      upload_assertion.call response, @upload_file_2_size, @upload_file_2_md5, remote_filename
     end
 
     should "download file" do
@@ -354,6 +367,9 @@ class RapidshareExtTest < Test::Unit::TestCase
       assert_raise_message(msg) do
         @rs.reload! :validate => true
       end
+
+      # Remedy
+      @rs.erase_all_data!
     end
   end
 end

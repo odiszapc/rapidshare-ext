@@ -73,6 +73,28 @@ By default, file is uploaded into the root folder:
 api.upload("/home/odiszapc/my_damn_humster.mov")
 ```
 
+Rapidshare allows to store multiple files having equal names under the same folder. I believe this behaviour is absolutely wrong.
+Therefore, each time upload performed it checks if the file with the given name already exists in a folder.
+If it's true, the upload() just returns info about the existing file with the :already_exists? flag is set to true without any real upload being performed.
+To force file being overwritten set the :overwrite parameter to true:
+
+```ruby
+api.upload "/home/odiszapc/my_damn_cat.mov",
+    :to => "/gallery/video",
+    :as => "cat1.mov"
+
+# No upload will be performed
+api.upload "/home/odiszapc/my_damn_cat.mov",
+    :to => "/gallery/video",
+    :as => "cat1.mov"
+
+# With the following notation file will be uploaded with overwriting the existing one
+api.upload "/home/odiszapc/my_damn_cat.mov",
+    :to => "/gallery/video",
+    :as => "cat1.mov",
+    :overwrite => true
+```
+
 Deleting files:
 ```ruby
 api.remove_file("/putin/is/a/good/reason/to/live/abroad/ticket_to_Nicaragua.jpg")
