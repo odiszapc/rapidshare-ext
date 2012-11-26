@@ -7,6 +7,14 @@ class RapidshareExtTest < Test::Unit::TestCase
   def setup
     FakeWeb.allow_net_connect = true
     @rs = Rapidshare::API.new :cookie =>  ENV['RAPIDSHARE_COOKIE']
+
+    account = @rs.get_account_details
+
+    # Check the account is the actually we wanted, because it will be erased in the next step
+    assert_equal ENV['RAPIDSHARE_USERNAME'], account[:username]
+    assert_equal ENV['RAPIDSHARE_EMAIL'], account[:email]
+    assert_equal ENV['RAPIDSHARE_ACCOUNT_ID'], account[:accountid]
+
     @rs.erase_all_data!
 
     @download_dir = File.expand_path(File.dirname(__FILE__) + "/../../tmp")
