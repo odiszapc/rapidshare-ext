@@ -32,26 +32,26 @@ Now you can perform file downloading in two ways: by HTTP url or by absolute pat
 
 First, by the HTTP url, as it has worked before:
 ```ruby
-@rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
-  :downloads_dir => "/tmp",
-  :save_as => "file2.txt" # This doesn't work in the original gem at the moment because of Rapidshare API changes
+@rs.download 'https://rapidshare.com/files/4226120320/upload_file_1.txt',
+  :downloads_dir => '/tmp',
+  :save_as => 'file2.txt' # This doesn't work in the original gem at the moment because of Rapidshare API changes
 
   # With a default local file name
-  @rs.download "https://rapidshare.com/files/4226120320/upload_file_1.txt",
-    :downloads_dir => "/tmp"
+  @rs.download 'https://rapidshare.com/files/4226120320/upload_file_1.txt',
+    :downloads_dir => '/tmp'
 ```
 
 Download by absolute path from account you owned:
 ```ruby
-@rs.download "/foo/bar/baz/upload_file_1.txt",
-  :downloads_dir => "/tmp"
+@rs.download '/foo/bar/baz/upload_file_1.txt',
+  :downloads_dir => '/tmp'
 ```
 
 In both the first and second samples the result will be the same.
 
 File uploading is also became very simple:
 ```ruby
-api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
+api.upload('/home/odiszapc/my_damn_cat.mov', :to => '/gallery/video', :as => 'cat1.mov')
 # => {
 #  :id         => 1,
 #  :size       => 12345, # File size in bytes
@@ -61,16 +61,16 @@ api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "ca
 #}
 ```
 Destination folder will be created automatically.
-After uploading has been completed the file will be stored in a Rapidshare as "/gallery/video/cat1.mov"
+After uploading has been completed the file will be stored in a Rapidshare as '/gallery/video/cat1.mov'
 You can easily get a download url after uploading:
 ```ruby
-result = api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
+result = api.upload('/home/odiszapc/my_damn_cat.mov', :to => '/gallery/video', :as => 'cat1.mov')
 result[:url]
 ```
 
 By default, file is uploaded into the root folder:
 ```ruby
-api.upload("/home/odiszapc/my_damn_humster.mov")
+api.upload('/home/odiszapc/my_damn_humster.mov')
 ```
 
 Rapidshare allows to store multiple files having equal names under the same folder. I believe this behaviour is absolutely wrong.
@@ -79,41 +79,41 @@ If it's true, the upload() just returns info about the existing file with the :a
 To force file being overwritten set the :overwrite parameter to true:
 
 ```ruby
-api.upload "/home/odiszapc/my_damn_cat.mov",
-    :to => "/gallery/video",
-    :as => "cat1.mov"
+api.upload '/home/odiszapc/my_damn_cat.mov',
+    :to => '/gallery/video',
+    :as => 'cat1.mov'
 
 # No upload will be performed
-api.upload "/home/odiszapc/my_damn_cat.mov",
-    :to => "/gallery/video",
-    :as => "cat1.mov"
+api.upload '/home/odiszapc/my_damn_cat.mov',
+    :to => '/gallery/video',
+    :as => 'cat1.mov'
 
 # With the following notation file will be uploaded with overwriting the existing one
-api.upload "/home/odiszapc/my_damn_cat.mov",
-    :to => "/gallery/video",
-    :as => "cat1.mov",
+api.upload '/home/odiszapc/my_damn_cat.mov',
+    :to => '/gallery/video',
+    :as => 'cat1.mov',
     :overwrite => true
 ```
 
 Deleting files:
 ```ruby
-api.remove_file("/putin/is/a/good/reason/to/live/abroad/ticket_to_Nicaragua.jpg")
+api.remove_file('/putin/is/a/good/reason/to/live/abroad/ticket_to_Nicaragua.jpg')
 ```
 
 Renaming files:
 ```ruby
-api.rename_file("/foo/bar.rar", "baz.rar")
+api.rename_file('/foo/bar.rar', 'baz.rar')
 ```
 
 Moving files:
 ```ruby
-api.move_file("/foo/bar/baz.rar", :to => "/foo") # new file path: "/foo/baz.rar"
-api.move_file("/foo/bar/baz.rar") # move to a root folder
+api.move_file('/foo/bar/baz.rar', :to => '/foo') # new file path: '/foo/baz.rar'
+api.move_file('/foo/bar/baz.rar') # move to a root folder
 ```
 
 Get the file ID:
 ```ruby
-api.file_id("/foo/bar/baz.rar") # => <ID>
+api.file_id('/foo/bar/baz.rar') # => <ID>
 ```
 
 ### Folders
@@ -121,19 +121,19 @@ As you note it's possible having a hierarchy of folders in your account.
 
 Creating folder hierarchy:
 ```ruby
-folder_id = api.add_folder "a/b/c" # => <FOLDER ID>
+folder_id = api.add_folder 'a/b/c' # => <FOLDER ID>
 ```
 
 Deleting folders:
 ```ruby
-api.remove_folder("/a/b/c")
+api.remove_folder('/a/b/c')
 ```
 
 Moving folders:
 ```ruby
-api.move_folder("/a/b/c", :to => "/a")
+api.move_folder('/a/b/c', :to => '/a')
 ```
-This moves the folder "c" from the directory "/a/b/" and places it under the directory "/a"
+This moves the folder 'c' from the directory '/a/b/' and places it under the directory '/a'
 
 You can get hierarchy of all the folders in account:
 ```ruby
@@ -150,7 +150,7 @@ api.folders_hierarchy
 
 Note, that after the folder hierarchy is generated first time it's cached permanently to improve performance.
 
-So, if you want to invalidate the cache just call the above method with trailing "!":
+So, if you want to invalidate the cache just call the above method with trailing '!':
 ```ruby
 api.folders_hierarchy!
 ```
@@ -164,15 +164,15 @@ Be careful with the tree consistency, orphan folders may contain a critical data
 
 A more secure way to deal with folder consistency is to fix all orphans first and then generate folder tree:
 ```ruby
-api.add_folder "/garbage"
-api.move_orphans :to => "/garbage" # Collect all orphans and place them under the /garbage folder
+api.add_folder '/garbage'
+api.move_orphans :to => '/garbage' # Collect all orphans and place them under the /garbage folder
 tree = api.folders_hierarchy
 ```
 
 Get the folder ID or path:
 ```ruby
-id = api.folder_id("/foo/bar") # <ID>
-api.folder_path(id) # "/foo/bar"
+id = api.folder_id('/foo/bar') # <ID>
+api.folder_path(id) # '/foo/bar'
 ```
 
 ### Orphans
@@ -181,7 +181,7 @@ What does it mean? When you delete parent folder by its ID the folder will be de
 For example, let we have the basic directory tree:
 ```
 ROOT
-`-a  <- Raw Rapidshare API allows you to delete JUST THIS folder, so hierarchy relation between folders will be lost and the folders "c" and "b" will became orphans
+`-a  <- Raw Rapidshare API allows you to delete JUST THIS folder, so hierarchy relation between folders will be lost and the folders 'c' and 'b' will became orphans
   `-b
     `-c
 ```
@@ -190,13 +190,13 @@ ROOT
 
 So, the best way to delete a directory tree without washing away consistency of account folder hierarchy is the following:
 ```ruby
-api.remove_folder "/a" # This will delete all the child directories correctly
+api.remove_folder '/a' # This will delete all the child directories correctly
 ```
 
 However, if you already have orphans in your account there is possible to fix them.
 So ,the next method detects all orphan folders in your account and moves them into a specific folder:
 ```ruby
-api.move_orphans :to => "/"
+api.move_orphans :to => '/'
 ```
 
 Or we can just delete all of them (be careful):

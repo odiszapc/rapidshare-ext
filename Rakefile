@@ -1,10 +1,10 @@
 #!/usr/bin/env rake
-require "bundler/gem_tasks"
+require 'bundler/gem_tasks'
 require 'rake/testtask'
 include Rake::DSL
 
-desc "Run tests"
-task :test => ['test:unit', 'test:integration']
+desc 'Run tests'
+task :test => %w{test:unit test:integration}
 
 task :default => :test
 

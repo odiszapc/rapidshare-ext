@@ -7,7 +7,7 @@ module Rapidshare
     # so the base download function provided by rapidshare gem became broken
     #
     # In the original method the parameter :filename being interpreted incorrectly now.
-    # It's being interpreted like a "save file as" parameter. Actually it must be equal to the file name you want to download
+    # It's being interpreted like a 'save file as' parameter. Actually it must be equal to the file name you want to download
     # So, to download file now you must specify exactly two parameters: file id and file name.
     class Download < Rapidshare::Download
 

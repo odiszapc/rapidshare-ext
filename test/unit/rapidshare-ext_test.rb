@@ -1,8 +1,8 @@
 require 'test_helper'
 
 class RapidshareExtTest < Test::Unit::TestCase
-  context "Interface" do
-    should "Respond to certain methods" do
+  context 'Interface' do
+    should 'Respond to certain methods' do
       assert_respond_to @rs, :add_folder
       assert_respond_to @rs, :remove_folder
       assert_respond_to @rs, :move_folder

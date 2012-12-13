@@ -2,7 +2,7 @@ module Rapidshare
   module Ext
     module API
 
-      FILE_COLUMNS = "downloads,lastdownload,filename,size,serverid,type,x,y,realfolder,killdeadline,uploadtime,comment,md5hex,licids,sentby"
+      FILE_COLUMNS = 'downloads,lastdownload,filename,size,serverid,type,x,y,realfolder,killdeadline,uploadtime,comment,md5hex,licids,sentby'
 
       # @param [String] path Folder name with absolute path to be created
       # @param [Hash] params
@@ -10,7 +10,7 @@ module Rapidshare
       #
       # Creates a folder in a Rapidshare virtual filesystem
       #
-      #    api.add_folder("/a/b/c") #=> <Random folder ID from Rapidshare>, 1234 for example
+      #    api.add_folder('/a/b/c') #=> <Random folder ID from Rapidshare>, 1234 for example
       def add_folder(path, params = {})
         path = path_trim path
 
@@ -34,7 +34,7 @@ module Rapidshare
 
              # The following code deals with #{} because of rest client #to_i returns HTTP code
             folder_id = "#{addrealfolder(add_folder_params)}".to_i
-            raise "error while creating folder" if parent < 0
+            raise 'error while creating folder' if parent < 0
             @tree[folder_id] = {
               :parent => parent,
               :name => folder_name,
@@ -55,7 +55,7 @@ module Rapidshare
       # @param [Hash] params
       # @return [Array]
       #
-      #    api.remove_folder("/a/b/c")
+      #    api.remove_folder('/a/b/c')
       def remove_folder(path, params = {})
         folder_id = self.folder_id path_trim(path)
         raise Exception, "Folder #{path} could not be found" if folder_id.nil?
@@ -84,9 +84,9 @@ module Rapidshare
       #
       # @param [String] source_path
       # @param [Hash] params
-      #   :to => <destination folder path>, default: "/"
+      #   :to => <destination folder path>, default: '/'
       #
-      #    api.move_folder("/a/b/c", :to => "/a")
+      #    api.move_folder('/a/b/c', :to => '/a')
       def move_folder(source_path, params = {})
         dest_path = (params.delete(:to) || '/')
         source_folder_id = folder_id(source_path)
@@ -110,13 +110,13 @@ module Rapidshare
       # @param [String] file_path
       # @param [Hash] params
       # <tt>:to</tt>::
-      #   Folder to place uploaded file to,  default: "/"
+      #   Folder to place uploaded file to,  default: '/'
       # <tt>:as</tt>::
       #   The name file will have in storage after it has been uploaded
       # <tt>:overwrite</tt>::
       #   Overwrite file if it already exists in the given folder
       #
-      #    api.upload("/home/odiszapc/my_damn_cat.mov", :to => "/gallery/video", :as => "cat1.mov")
+      #    api.upload('/home/odiszapc/my_damn_cat.mov', :to => '/gallery/video', :as => 'cat1.mov')
       def upload(file_path, params = {})
         raise Exception unless File.exist? file_path
         dest_path = path_trim(params.delete(:to) || '/')
@@ -128,12 +128,12 @@ module Rapidshare
         listfiles_params = {
           :realfolder => folder_id,
           :filename => "#{file_name}",
-          :fields => "md5hex,size",
+          :fields => 'md5hex,size',
           :parser => :csv
         }
         listfiles_response = self.listfiles listfiles_params
 
-        file_already_exists = ("NONE" != listfiles_response[0][0])
+        file_already_exists = ('NONE' != listfiles_response[0][0])
         remove_file "#{dest_path}/#{file_name}" if file_already_exists && overwrite
 
         # In case of file is not existing then upload it
@@ -181,7 +181,7 @@ module Rapidshare
       # @param [String] path
       # @param [Hash] params
       #
-      #    api.remove_file("/putin/is/a/good/reason/to/live/abroad/ticket_to_Nikaragua.jpg")
+      #    api.remove_file('/putin/is/a/good/reason/to/live/abroad/ticket_to_Nikaragua.jpg')
       def remove_file(path, params = {})
         params = {
           :files => file_id(path).to_s
@@ -196,7 +196,7 @@ module Rapidshare
       # @param [String] name
       # @param [Hash] params
       #
-      #    api.rename_file("/foo/bar.rar", "baz.rar")
+      #    api.rename_file('/foo/bar.rar', 'baz.rar')
       def rename_file(remote_path, name, params = {})
         file_id = file_id remote_path
 
@@ -214,10 +214,10 @@ module Rapidshare
       # @param [String] remote_path
       # @param [Hash] params
       # <tt>:to</tt>::
-      #   Destination folder path, default: "/"
+      #   Destination folder path, default: '/'
       #
-      #    api.move_file("/foo/bar/baz.rar", :to => "/foo")
-      #    api.move_file("/foo/bar/baz.rar") # move to a root folder
+      #    api.move_file('/foo/bar/baz.rar', :to => '/foo')
+      #    api.move_file('/foo/bar/baz.rar') # move to a root folder
       def move_file(remote_path, params = {})
         file_id = file_id remote_path
         dest_path = path_trim(params.delete(:to) || '/')
@@ -318,16 +318,16 @@ module Rapidshare
       # Build tree relative to a specified folder
       # If the source tree is:
       # tree = {
-      #   1 => {:parent => 0, :name => "a", :path => "a"},
-      #   2 => {:parent => 1, :name => "b", :path => "a/b"},
-      #   3 => {:parent => 2, :name => "c", :path => "a/b/c"},
+      #   1 => {:parent => 0, :name => 'a', :path => 'a'},
+      #   2 => {:parent => 1, :name => 'b', :path => 'a/b'},
+      #   3 => {:parent => 2, :name => 'c', :path => 'a/b/c'},
       #   ...
       # }
-      # slice_tree tree, :from => "/a"
+      # slice_tree tree, :from => '/a'
       # Result will be as follows:
       # {
-      #   2 => {:parent => 1, :name => "b", :path => "b"},
-      #   3 => {:parent => 2, :name => "c", :path => "b/c"},
+      #   2 => {:parent => 1, :name => 'b', :path => 'b'},
+      #   3 => {:parent => 2, :name => 'c', :path => 'b/c'},
       #   ...
       # }
       def slice_tree(tree, params = {})
@@ -369,7 +369,7 @@ module Rapidshare
       # Orphan folder is a folder with non existing parent (yes, it's possible)
       #
       # Example:
-      # move_orphans :to => "/"
+      # move_orphans :to => '/'
       def move_orphans(params = {})
         new_folder = path_trim(params.delete(:to) || '/')
         gaps = detect_gaps
@@ -421,7 +421,7 @@ module Rapidshare
       # For example we have the following hierarchy:
       #
       # ROOT
-      # `-a  <- if we remove just this folder then the folder "c" and "b" will become orphans
+      # `-a  <- if we remove just this folder then the folder 'c' and 'b' will become orphans
       #   `-b
       #     `-c
       def orphan?(folder_id)
@@ -435,11 +435,11 @@ module Rapidshare
 
       # Translate folder ID to a human readable path
       #
-      #    api.folder_path(123) # -> "foo/bar/baz"
+      #    api.folder_path(123) # -> 'foo/bar/baz'
       def folder_path(folder_id)
         @tree = folders_hierarchy
 
-        folder_data = @tree[folder_id] || {:parent => 0, :name => "<undefined>", :path => "<undefined>"}
+        folder_data = @tree[folder_id] || {:parent => 0, :name => '<undefined>', :path => '<undefined>'}
 
         parent_id = folder_data[:parent]
         path = (folder_path(parent_id) if parent_id.nonzero?).to_s + ('/' if parent_id.nonzero?).to_s + folder_data[:name]
@@ -448,7 +448,7 @@ module Rapidshare
 
       # Get folder ID by path
       #
-      #    api.folder_id("foo/bar/baz") # -> 123
+      #    api.folder_id('foo/bar/baz') # -> 123
       def folder_id(folder_path)
         folder_path = path_trim(folder_path)
         return 0 if folder_path.empty?
@@ -494,12 +494,12 @@ module Rapidshare
         }.merge params
 
         resp = listfiles(listfiles_params)[0]
-        return nil if "NONE" == resp[0]
+        return nil if 'NONE' == resp[0]
 
         response = {}
 
         fields = listfiles_params[:fields].split(',')
-        fields.unshift "id"
+        fields.unshift 'id'
         fields.each_with_index do |value, index|
           response[value.to_sym] = resp[index]
         end
@@ -511,9 +511,9 @@ module Rapidshare
 
       # Returns file ID by absolute path
       #
-      #    api.file_id("foo/bar/baz/file.rar") # => <FILE_ID>
+      #    api.file_id('foo/bar/baz/file.rar') # => <FILE_ID>
       def file_id(file_path, params = {})
-        params[:fields] = ""
+        params[:fields] = ''
         file_info = file_info file_path, params
         (file_info || {})[:id].to_i
       end
@@ -525,7 +525,7 @@ module Rapidshare
       end
 
       def path_canonize(path)
-        "/" + path_trim(path)
+        '/' + path_trim(path)
       end
     end
   end

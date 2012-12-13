@@ -18,7 +18,7 @@ module Rapidshare
       #   * *none* - default value, returns response body as it is
       #   * *csv* - comma-separated values, for example: _getrapidtranslogs_.
       #     Returns array or arrays, one array per each line.
-      #   * *hash* - lines with key and value separated by "=", for example:
+      #   * *hash* - lines with key and value separated by '=', for example:
       #     _getaccountdetails_. Returns hash.
       # * *server* - option, determines which server will be used to send request
       #
@@ -45,10 +45,10 @@ module Rapidshare
         end
 
         if response.start_with?(ERROR_PREFIX)
-          case error = response.sub(ERROR_PREFIX, "").split('.').first
-            when "Login failed"
+          case error = response.sub(ERROR_PREFIX, '').split('.').first
+            when 'Login failed'
               raise Rapidshare::API::Error::LoginFailed
-            when "Invalid routine called"
+            when 'Invalid routine called'
               raise Rapidshare::API::Error::InvalidRoutineCalled.new(service_name)
             else
               raise Rapidshare::API::Error.new(error)
