@@ -44,14 +44,10 @@ module Rapidshare
 
         begin
           file = open(File.join(@downloads_dir, @filename), 'wb')
-
-          uri = URI.parse(self.download_link)
-
           block_response = Proc.new do |response|
-
             size = 0
             progress = 0
-            total = response.header["content-length"].to_i
+            total = response.header['content-length'].to_i
 
             response.read_body do |chunk|
               file << chunk
@@ -64,29 +60,9 @@ module Rapidshare
             end
           end
 
-
-
-          response = RestClient::Request.execute(:method => :get,
-                                     :url => self.download_link,
-                                     :block_response => block_response)
-
-          #http = Net::HTTP.new(uri.host, uri.port)
-          #if uri.scheme.downcase == 'https'
-          #  http.use_ssl = true
-          #  http.ca_file
-          #  http.verify_mode OpenSSL::SSL::VERIFY_NONE
-          #end
-          #
-          #
-          #http.request_get(uri.path){ |resp|
-          #  resp.read_body{ |seg|
-          #    file << seg
-          #    #hack -- adjust to suit:
-          #    sleep 0.005
-          #  }
-          #}
-
-
+          RestClient::Request.execute(:method => :get,
+                                      :url => self.download_link,
+                                      :block_response => block_response)
         ensure
           file.close()
         end
