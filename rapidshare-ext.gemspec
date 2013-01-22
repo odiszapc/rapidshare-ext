@@ -16,11 +16,11 @@ Gem::Specification.new do |gem|
   gem.require_paths = %w{lib}
 
 
-  gem.add_dependency('rapidshare', '~> 0.5.3')
   gem.add_dependency('rest-client', '~> 1.6.7')
 
   gem.add_development_dependency('test-unit')
   gem.add_development_dependency('shoulda')
   gem.add_development_dependency('simplecov')
   gem.add_development_dependency('fakeweb')
+  gem.add_development_dependency('rake')
 end

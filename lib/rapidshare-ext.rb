@@ -1,11 +1,10 @@
 require 'rest-client'
-require 'progressbar'
+#require 'progressbar'
 
 # active_support helpers
 require 'active_support/core_ext/object/to_query'
 require 'active_support/core_ext/hash/keys'
 
-require 'rapidshare'
 require 'rapidshare-base/utils'
 require 'rapidshare-base/api'
 require 'rapidshare-base/download'

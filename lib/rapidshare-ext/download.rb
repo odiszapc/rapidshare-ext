@@ -36,6 +36,62 @@ module Rapidshare
         res
       end
 
+      def perform
+        # before downloading we have to check if file exists. checkfiles service
+        # also gives us information for the download: hostname, file size for
+        # progressbar
+        return self unless self.check
+
+        begin
+          file = open(File.join(@downloads_dir, @filename), 'wb')
+
+          uri = URI.parse(self.download_link)
+
+          block_response = Proc.new do |response|
+
+            size = 0
+            progress = 0
+            total = response.header["content-length"].to_i
+
+            response.read_body do |chunk|
+              file << chunk
+              size += chunk.size
+              new_progress = (size * 100) / total
+              unless new_progress == progress
+                puts "\rDownloading (%3d%%) " % [new_progress]
+              end
+              progress = new_progress
+            end
+          end
+
+
+
+          response = RestClient::Request.execute(:method => :get,
+                                     :url => self.download_link,
+                                     :block_response => block_response)
+
+          #http = Net::HTTP.new(uri.host, uri.port)
+          #if uri.scheme.downcase == 'https'
+          #  http.use_ssl = true
+          #  http.ca_file
+          #  http.verify_mode OpenSSL::SSL::VERIFY_NONE
+          #end
+          #
+          #
+          #http.request_get(uri.path){ |resp|
+          #  resp.read_body{ |seg|
+          #    file << seg
+          #    #hack -- adjust to suit:
+          #    sleep 0.005
+          #  }
+          #}
+
+
+        ensure
+          file.close()
+        end
+      end
+
       # Generates link which downloads file by Rapidshare API
       #
       def download_link
