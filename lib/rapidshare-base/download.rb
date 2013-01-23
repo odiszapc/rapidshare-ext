@@ -54,49 +54,6 @@ module Rapidshare
       end
     end
 
-    # Downloads file. Calls +check+ method first.
-    #
-    def perform
-      # before downloading we have to check if file exists. checkfiles service
-      # also gives us information for the download: hostname, file size for
-      # progressbar
-      return self unless self.check
-
-      file = open(File.join(@downloads_dir, @filename), 'wb')
-
-      bar = ProgressBar.new(@filename, @filesize)
-      bar.file_transfer_mode
-
-      Curl::Easy.perform(self.download_link) do |curl|
-        # HOTFIX don't verify SSL peer certificate
-        curl.ssl_verify_peer = false
-
-        curl.on_progress do |dl_total, dl_now|
-          bar.set(dl_now)
-          dl_now <= dl_total
-        end
-
-        curl.on_body do |data|
-          file << data
-          data.length
-        end
-
-        curl.on_complete { bar.finish }
-      end
-
-      file.close
-
-      @downloaded = true
-      self
-    end
-
-    # Generates link which downloads file by Rapidshare API
-    #
-    def download_link
-      download_params = { :sub => 'download', :fileid => @fileid, :filename => @filename, :cookie => @api.cookie }
-      DOWNLOAD_URL % [ @server_id, @short_host, download_params.to_query ]
-    end
-
     # Says whether file has been successfully downloaded.
     #
     def downloaded?

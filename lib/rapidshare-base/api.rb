@@ -188,14 +188,14 @@ module Rapidshare
         end
       end
 
-      def download(file, params= {})
+      def download(file, params= {}, &block)
         if file.match /\Ahttps?:\/\//
           url = file
         else
           url = file_info(file)[:url]
         end
 
-        Rapidshare::Ext::Download.new(url, self, params).perform
+        Rapidshare::Ext::Download.new(url, self, params).perform &block
       end
   end
 end

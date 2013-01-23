@@ -36,6 +36,8 @@ module Rapidshare
         res
       end
 
+      # Downloads file. Calls +check+ method first.
+      # When block is given a custom progress bar interpretation can be implemented
       def perform
         # before downloading we have to check if file exists. checkfiles service
         # also gives us information for the download: hostname, file size for
@@ -45,18 +47,14 @@ module Rapidshare
         begin
           file = open(File.join(@downloads_dir, @filename), 'wb')
           block_response = Proc.new do |response|
-            size = 0
-            progress = 0
+            downloaded = 0
             total = response.header['content-length'].to_i
 
             response.read_body do |chunk|
               file << chunk
-              size += chunk.size
-              new_progress = (size * 100) / total
-              unless new_progress == progress
-                puts "\rDownloading (%3d%%) " % [new_progress]
-              end
-              progress = new_progress
+              downloaded += chunk.size
+              progress = ((downloaded * 100).to_f / total).round(2)
+              yield chunk.size, downloaded, total, progress if block_given?
             end
           end
 
@@ -65,7 +63,9 @@ module Rapidshare
                                       :block_response => block_response)
         ensure
           file.close()
+          @downloaded = true
         end
+        self
       end
 
       # Generates link which downloads file by Rapidshare API

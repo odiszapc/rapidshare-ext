@@ -18,9 +18,9 @@ class RapidshareExtTest < Test::Unit::TestCase
     @rs.erase_all_data!
 
     @download_dir = File.expand_path(File.dirname(__FILE__) + '/../../tmp')
-    File.delete "#@download_dir/file1.txt" if File.exist? "#@download_dir/file1.txt"
-    File.delete "#@download_dir/file2.txt" if File.exist? "#@download_dir/file2.txt"
-    File.delete "#@download_dir/upload_file_1.txt" if File.exist? "#@download_dir/upload_file_1.txt"
+    %w{file1.txt file2.txt file3.txt upload_file_1.txt}.each do |filename|
+      File.delete "#@download_dir/#{filename}" if File.exist? "#@download_dir/#{filename}"
+    end
 
     @upload_file_1 = File.expand_path(File.dirname(__FILE__) + '/../fixtures/files/upload1.txt')
     @upload_file_1_md5 = Digest::MD5.hexdigest(File.read(@upload_file_1))
@@ -29,6 +29,10 @@ class RapidshareExtTest < Test::Unit::TestCase
     @upload_file_2 = File.expand_path(File.dirname(__FILE__) + '/../fixtures/files/upload2.txt')
     @upload_file_2_md5 = Digest::MD5.hexdigest(File.read(@upload_file_2))
     @upload_file_2_size = File.size @upload_file_2
+
+    @upload_file_3 = File.expand_path(File.dirname(__FILE__) + '/../fixtures/files/upload3.txt')
+    @upload_file_3_md5 = Digest::MD5.hexdigest(File.read(@upload_file_3))
+    @upload_file_3_size = 102598 # 100 Kb
   end
 
   context 'Api' do
@@ -87,23 +91,51 @@ class RapidshareExtTest < Test::Unit::TestCase
       @rs.upload @upload_file_1, :to => '/a/b/c', :as => 'upload_file_1.txt'
       assert_not_nil @rs.file_info('/a/b/c/upload_file_1.txt')
 
-      @rs.download '/a/b/c/upload_file_1.txt', :downloads_dir => @download_dir, :save_as => 'file1.txt'
+      res = @rs.download '/a/b/c/upload_file_1.txt', :downloads_dir => @download_dir, :save_as => 'file1.txt'
+      assert_true res.downloaded?
       assert_path_exist "#@download_dir/file1.txt"
       assert_equal @upload_file_1_size, File.size("#@download_dir/file1.txt")
       assert_equal @upload_file_1_md5, Digest::MD5.hexdigest(File.read("#@download_dir/file1.txt"))
 
       # Download with default :save_as
-      @rs.download '/a/b/c/upload_file_1.txt', :downloads_dir => @download_dir
+      res = @rs.download '/a/b/c/upload_file_1.txt', :downloads_dir => @download_dir
+      assert_true res.downloaded?
       assert_path_exist "#@download_dir/upload_file_1.txt"
       assert_equal @upload_file_1_size, File.size("#@download_dir/upload_file_1.txt")
       assert_equal @upload_file_1_md5, Digest::MD5.hexdigest(File.read("#@download_dir/upload_file_1.txt"))
 
       # Download by http url
       download_url = @rs.file_info('/a/b/c/upload_file_1.txt')[:url]
-      @rs.download download_url, :downloads_dir => @download_dir, :save_as => 'file2.txt'
+      res = @rs.download download_url, :downloads_dir => @download_dir, :save_as => 'file2.txt'
+      assert_true res.downloaded?
       assert_path_exist "#@download_dir/file2.txt"
       assert_equal @upload_file_1_size, File.size("#@download_dir/file2.txt")
       assert_equal @upload_file_1_md5, Digest::MD5.hexdigest(File.read("#@download_dir/file2.txt"))
+
+      @rs.upload @upload_file_3, :to => '/a/b/c', :as => 'upload_3.txt'
+      assert_not_nil @rs.file_info('/a/b/c/upload_3.txt')
+
+      # Download file with a flow control
+      metrics = []
+      res = @rs.download '/a/b/c/upload_3.txt',
+                   :downloads_dir => @download_dir,
+                   :save_as => 'file3.txt' do |chunk_size, downloaded, total, progress|
+       metrics << [chunk_size, downloaded, total, progress]
+      end
+      expected_metrics = [
+        [0,     0,      @upload_file_3_size, 0],
+        [16384, 16384,  @upload_file_3_size, 15.97],
+        [16384, 32768,  @upload_file_3_size, 31.94],
+        [16384, 49152,  @upload_file_3_size, 47.91],
+        [16384, 65536,  @upload_file_3_size, 63.88],
+        [16384, 81920,  @upload_file_3_size, 79.85],
+        [16384, 98304,  @upload_file_3_size, 95.81],
+        [4294, 102598,  @upload_file_3_size, 100.00],
+      ]
+      assert_equal expected_metrics, metrics
+      assert_true res.downloaded?
+      assert_equal @upload_file_3_size, File.size("#@download_dir/file3.txt")
+      assert_equal @upload_file_3_md5, Digest::MD5.hexdigest(File.read("#@download_dir/file3.txt"))
     end
 
     should 'rename file' do
