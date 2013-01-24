@@ -44,27 +44,24 @@ module Rapidshare
         # progressbar
         return self unless self.check
 
-        begin
-          file = open(File.join(@downloads_dir, @filename), 'wb')
-          block_response = Proc.new do |response|
-            downloaded = 0
-            total = response.header['content-length'].to_i
+        file = open(File.join(@downloads_dir, @filename), 'wb')
+        block_response = Proc.new do |response|
+          downloaded = 0
+          total = response.header['content-length'].to_i
 
-            response.read_body do |chunk|
-              file << chunk
-              downloaded += chunk.size
-              progress = ((downloaded * 100).to_f / total).round(2)
-              yield chunk.size, downloaded, total, progress if block_given?
-            end
+          response.read_body do |chunk|
+            file << chunk
+            downloaded += chunk.size
+            progress = ((downloaded * 100).to_f / total).round(2)
+            yield chunk.size, downloaded, total, progress if block_given?
           end
-
-          RestClient::Request.execute(:method => :get,
-                                      :url => self.download_link,
-                                      :block_response => block_response)
-        ensure
-          file.close()
-          @downloaded = true
         end
+
+        RestClient::Request.execute(:method => :get,
+                                    :url => self.download_link,
+                                    :block_response => block_response)
+        file.close()
+        @downloaded = true
         self
       end
 
