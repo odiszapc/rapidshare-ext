@@ -18,9 +18,10 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency('rest-client', '~> 1.6.7')
 
-  gem.add_development_dependency('test-unit')
-  gem.add_development_dependency('shoulda')
-  gem.add_development_dependency('simplecov')
-  gem.add_development_dependency('fakeweb')
-  gem.add_development_dependency('rake')
+  gem.add_development_dependency('test-unit', '~> 2.5.4')
+  gem.add_development_dependency('shoulda', '~> 3.3.2')
+  gem.add_development_dependency('simplecov', '~> 0.7.1')
+  gem.add_development_dependency('fakeweb', '~> 1.3.0')
+  gem.add_development_dependency('mocha', '~> 0.13.2')
+  gem.add_development_dependency('rake', '~> 10.0.3')
 end

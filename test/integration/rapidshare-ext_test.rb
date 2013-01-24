@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'digest/md5'
 require File.expand_path(File.dirname(__FILE__) + '/../test_helper')
 
@@ -128,12 +127,8 @@ class RapidshareExtTest < Test::Unit::TestCase
       assert_not_nil @rs.file_info('/a/b/c/upload_3.txt')
 
       # Download file with a flow control
-      metrics = []
-      res = @rs.download '/a/b/c/upload_3.txt',
-                   :downloads_dir => @download_dir,
-                   :save_as => 'file3.txt' do |chunk_size, downloaded, total, progress|
-       metrics << [chunk_size, downloaded, total, progress]
-      end
+      file = '/a/b/c/upload_3.txt'
+      https_url = @rs.file_info(file)[:url]
       expected_metrics = [
         [0,     0,      @upload_file_3_size, 0],
         [16384, 16384,  @upload_file_3_size, 15.97],
@@ -144,6 +139,27 @@ class RapidshareExtTest < Test::Unit::TestCase
         [16384, 98304,  @upload_file_3_size, 95.81],
         [4294, 102598,  @upload_file_3_size, 100.00],
       ]
+
+      # Download through HTTPS
+      metrics = []
+      res = @rs.download https_url, :downloads_dir => @download_dir, :save_as => 'file3.txt' \
+      do |chunk_size, downloaded, total, progress|
+        metrics << [chunk_size, downloaded, total, progress]
+      end
+
+      assert_equal expected_metrics, metrics
+      assert_true res.downloaded?
+      assert_equal @upload_file_3_size, File.size("#@download_dir/file3.txt")
+      assert_equal @upload_file_3_md5, Digest::MD5.hexdigest(File.read("#@download_dir/file3.txt"))
+
+      # Download through HTTP
+      metrics = []
+      http_url = https_url.gsub /^https/, 'http'
+      res = @rs.download http_url, :downloads_dir => @download_dir, :save_as => 'file3.txt' \
+      do |chunk_size, downloaded, total, progress|
+        metrics << [chunk_size, downloaded, total, progress]
+      end
+
       assert_equal expected_metrics, metrics
       assert_true res.downloaded?
       assert_equal @upload_file_3_size, File.size("#@download_dir/file3.txt")
