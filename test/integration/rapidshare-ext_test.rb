@@ -36,6 +36,18 @@ class RapidshareExtTest < Test::Unit::TestCase
   end
 
   context 'Api' do
+
+    should 'initialize by login and password' do
+      rs = Rapidshare::API.new :login => ENV['RAPIDSHARE_USERNAME'],
+                               :password => ENV['RAPIDSHARE_PASSWORD']
+      assert_equal ENV['RAPIDSHARE_COOKIE'], rs.cookie
+
+      account = rs.get_account_details
+      assert_equal ENV['RAPIDSHARE_USERNAME'], account[:username]
+      assert_equal ENV['RAPIDSHARE_EMAIL'], account[:email]
+      assert_equal ENV['RAPIDSHARE_ACCOUNT_ID'], account[:accountid]
+    end
+
     should 'upload file' do
       upload_assertion = ->(resp, size_local, digest_local, remote_filename) do
         assert_instance_of Hash, resp
