@@ -99,11 +99,20 @@ class RapidshareExtTest < Test::Unit::TestCase
     end
 
     should 'download file' do
+      # Download file with denied access
+      instance = @rs.download 'https://rapidshare.com/files/829628035/HornyRhinos.jpg', :downloads_dir => @download_dir
+      assert_equal 'Access denied', instance.error
+
+      # Download invalid file
+      instance = @rs.download 'https://rapidshare.com/files/000000000/NonExistingFile.zip', :downloads_dir => @download_dir
+      assert_equal 'File not found', instance.error
+
       @rs.upload @upload_file_1, :to => '/a/b/c', :as => 'upload_file_1.txt'
       assert_not_nil @rs.file_info('/a/b/c/upload_file_1.txt')
 
       res = @rs.download '/a/b/c/upload_file_1.txt', :downloads_dir => @download_dir, :save_as => 'file1.txt'
       assert_true res.downloaded?
+      assert_nil res.error
       assert_path_exist "#@download_dir/file1.txt"
       assert_equal @upload_file_1_size, File.size("#@download_dir/file1.txt")
       assert_equal @upload_file_1_md5, Digest::MD5.hexdigest(File.read("#@download_dir/file1.txt"))
@@ -111,6 +120,7 @@ class RapidshareExtTest < Test::Unit::TestCase
       # Download with default :save_as
       res = @rs.download '/a/b/c/upload_file_1.txt', :downloads_dir => @download_dir
       assert_true res.downloaded?
+      assert_nil res.error
       assert_path_exist "#@download_dir/upload_file_1.txt"
       assert_equal @upload_file_1_size, File.size("#@download_dir/upload_file_1.txt")
       assert_equal @upload_file_1_md5, Digest::MD5.hexdigest(File.read("#@download_dir/upload_file_1.txt"))
@@ -119,6 +129,7 @@ class RapidshareExtTest < Test::Unit::TestCase
       download_url = @rs.file_info('/a/b/c/upload_file_1.txt')[:url]
       res = @rs.download download_url, :downloads_dir => @download_dir, :save_as => 'file2.txt'
       assert_true res.downloaded?
+      assert_nil res.error
       assert_path_exist "#@download_dir/file2.txt"
       assert_equal @upload_file_1_size, File.size("#@download_dir/file2.txt")
       assert_equal @upload_file_1_md5, Digest::MD5.hexdigest(File.read("#@download_dir/file2.txt"))
@@ -149,6 +160,7 @@ class RapidshareExtTest < Test::Unit::TestCase
 
       assert_equal expected_metrics, metrics
       assert_true res.downloaded?
+      assert_nil res.error
       assert_equal @upload_file_3_size, File.size("#@download_dir/file3.txt")
       assert_equal @upload_file_3_md5, Digest::MD5.hexdigest(File.read("#@download_dir/file3.txt"))
 
@@ -162,6 +174,7 @@ class RapidshareExtTest < Test::Unit::TestCase
 
       assert_equal expected_metrics, metrics
       assert_true res.downloaded?
+      assert_nil res.error
       assert_equal @upload_file_3_size, File.size("#@download_dir/file3.txt")
       assert_equal @upload_file_3_md5, Digest::MD5.hexdigest(File.read("#@download_dir/file3.txt"))
     end

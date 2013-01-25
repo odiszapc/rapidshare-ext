@@ -7,7 +7,6 @@ require 'active_support/core_ext/hash/keys'
 
 require 'rapidshare-base/utils'
 require 'rapidshare-base/api'
-require 'rapidshare-base/download'
 
 require 'rapidshare-ext/api'
 require 'rapidshare-ext/download'
