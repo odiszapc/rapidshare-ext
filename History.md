@@ -1,3 +1,11 @@
+## ver. 0.1.0 2012-01-25
+* [added] Ability to injecting into the file download process and implementing custom progress bar functionality
+* [changed] Rid of original rapidshare gem dependency which was not supported for 5 months. Gem have become standalone now.
+* [changed] Remove Curl lib dependency which could cause a problem on Windows machines.
+* [changed] Remove Progressbar gem dependency against api for implementing custom progress bars
+* [changed] File downloading works through native Ruby HTTP libraries using RestClient
+* [changed] Integration test have been greatly improved and original gem tests have been included to increase coverage
+
 ## ver. 0.0.6 2012-11-25
 
 * [changed] upload(): :overwrite parameter added
