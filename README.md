@@ -2,7 +2,8 @@
 
 Makes your interactions with the Rapidshare API more pleasant by providing new handy features: creating/moving/deleting files/folders in a user friendly way, upload files, etc.
 
-This gem extends the existing one - https://github.com/defkode/rapidshare, so it has all features have been implemented by the authors of the original gem at the moment.
+Until Jan 2013 this gem has extended the existing one - https://github.com/defkode/rapidshare, so it has all features have been implemented by the authors of the original gem at the moment.
+From Jan 2013 Rapidshare-Ext gem has branched out and ships as a standalone library.
 
 ## Installation
 
@@ -28,7 +29,7 @@ api = Rapidshare::API.new(:cookie => 'cookie_here') # More preferable way
 
 ### Files
 
-Now you can perform file downloading in two ways: by HTTP url or by absolute path.
+Now you can perform file download in two ways: by HTTP/HTTPS url or by absolute path.
 
 First, by the HTTP url, as it has worked before:
 ```ruby
@@ -48,6 +49,27 @@ Download by absolute path from account you owned:
 ```
 
 In both the first and second samples the result will be the same.
+
+It's possible to implement a custom progress bar functionality by providing a codeblock to #download method
+```ruby
+@rs.download '/foo/bar.txt', :downloads_dir => '/tmp'
+do |chunk_size, downloaded, total, progress|
+  # chunk_size has the default value of 16384 bytes for Ruby 1.9
+  # downloaded is a aggregated size of file part has already been downloaded at the moment
+  # total represents a file total size
+  # progress is a progress bar value in percents
+  #
+  # Example: While user downloading a 102598 bytes file the valuse will be as follows:
+  # Iter 1: chunk_size=0,     downloaded=0, total=102598, progress=0
+  # Iter 2: chunk_size=16384, downloaded=0, total=102598, progress=15.97
+  # Iter 3: chunk_size=16384, downloaded=0, total=102598, progress=31.94
+  # Iter 4: chunk_size=16384, downloaded=0, total=102598, progress=47.91
+  # Iter 5: chunk_size=16384, downloaded=0, total=102598, progress=63.88
+  # Iter 6: chunk_size=16384, downloaded=0, total=102598, progress=79.85
+  # Iter 7: chunk_size=16384, downloaded=0, total=102598, progress=95.81
+  # Iter 8: chunk_size=4294,  downloaded=0, total=102598, progress=100.00
+end
+```
 
 File uploading is also became very simple:
 ```ruby
